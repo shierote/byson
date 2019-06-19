@@ -1,16 +1,28 @@
 version: '3'
 services:
+  metabase:
+    container_name: metabase
+    image: metabase/metabase
+    ports:
+      - "3000:3000"
+    links:
+      - db
   db:
     image: mysql:5.7
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
-      - .:/var/www/byson
+      - ./db/mysql_data:/var/lib/mysql
     restart: always
+    ports:
+      - "4306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: django
-      MYSQL_DATABASE: byson
-      MYSQL_USER: django
-      MYSQL_PASSWORD: django
+      - MYSQL_ROOT_PASSWORD=django
+      - MYSQL_DATABASE=byson
+      - MYSQL_USER=django
+      - MYSQL_PASSWORD=django
+      - Toggl_API_TOKEN
+      - Toggl_WORKSPACE_ID
+      - MAIL
   web:
     build: .
     command: sh -c "./wait-for-it.sh db:3306; python3 manage.py runserver 0.0.0.0:8000"
